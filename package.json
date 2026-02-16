@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:prod": "ng build --configuration=production",
-    "deploy": "ng build --configuration=production --base-href='/HoneyDoThis-frontend/' && npx angular-cli-ghpages --dir=docs --no-silent"
+    "deploy": "powershell -ExecutionPolicy Bypass -File ./deploy.ps1"
   },
   "prettier": {
     "printWidth": 100,
