@@ -1,81 +1,81 @@
+// Business logic service for task operations
+// Depends on TaskStateService for data management
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Task, FilterType } from '../models/task.model';
+import { TaskStateService } from './task-state-service';
+import { Subtask } from '../models/subtask.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
-  private tasksSubject: BehaviorSubject<Task[]>;
-  public tasks$: Observable<Task[]>;
-  private nextId: number = 0;
+  private nextId: number = 0; // For generating unique task IDs
 
-  constructor() {
-    // Initialize tasks from localStorage
-    const savedTasks = this.loadTasksFromStorage();
+  constructor(private stateService: TaskStateService) {
+    // Initialize from stored data on service creation
+    const savedTasks = this.stateService.loadTasksFromStorage();
 
-    // Ensure all tasks have an order property (for backward compatibility)
+    // Ensure all tasks have required properties (for backward compatibility)
     const tasksWithOrder = savedTasks.map((task, index) => ({
       ...task,
-      order: task.order !== undefined ? task.order : index
+      order: task.order !== undefined ? task.order : index,
+      expanded: task.expanded !== undefined ? task.expanded : false
     }));
 
-    this.tasksSubject = new BehaviorSubject<Task[]>(tasksWithOrder);
-    this.tasks$ = this.tasksSubject.asObservable();
-
-    // Set nextId based on existing tasks
+    this.stateService.saveTasksToStorage(tasksWithOrder);
     this.updateNextId();
   }
 
-  // Get current tasks value synchronously
+  // Public observables - expose state service data with transformations
+  get tasks$(): Observable<Task[]> {
+    return this.stateService.tasks$;
+  }
+
+  // Synchronous accessors for current state
   get currentTasks(): Task[] {
-    return this.tasksSubject.getValue();
+    return this.stateService.currentTasks;
   }
 
-  // Get tasks sorted by order
-  private getSortedTasks(tasks: Task[]): Task[] {
-    return [...tasks].sort((a, b) => a.order - b.order);
-  }
-
-  // Get filtered tasks as observable (sorted by order)
+  // Filter tasks based on completion status
   getFilteredTasks(filter: FilterType): Observable<Task[]> {
-    return this.tasks$.pipe(
+    return this.stateService.tasks$.pipe(
       map(tasks => {
-        const filtered = this.getSortedTasks(tasks);
+        const sorted = [...tasks].sort((a, b) => a.order - b.order); // Maintain order
         switch (filter) {
           case 'active':
-            return filtered.filter(task => !task.completed);
+            return sorted.filter(task => !task.completed);
           case 'completed':
-            return filtered.filter(task => task.completed);
+            return sorted.filter(task => task.completed);
           default:
-            return filtered;
+            return sorted; // 'all' filter
         }
       })
     );
   }
 
-  // Get count of active tasks
+  // Count observables - derived data for UI
   getActiveCount(): Observable<number> {
-    return this.tasks$.pipe(
+    return this.stateService.tasks$.pipe(
       map(tasks => tasks.filter(task => !task.completed).length)
     );
   }
 
-  // Get count of completed tasks
   getCompletedCount(): Observable<number> {
-    return this.tasks$.pipe(
+    return this.stateService.tasks$.pipe(
       map(tasks => tasks.filter(task => task.completed).length)
     );
   }
 
-  // Get total task count
   getTotalCount(): Observable<number> {
-    return this.tasks$.pipe(
+    return this.stateService.tasks$.pipe(
       map(tasks => tasks.length)
     );
   }
 
-  // Add new task (adds to the end)
+  // CRUD Operations
+
+  // Create new task
   addTask(text: string): void {
     if (!text.trim()) return;
 
@@ -84,40 +84,20 @@ export class TaskService {
       ? Math.max(...currentTasks.map(t => t.order))
       : -1;
 
+    // Use timestamp + counter to ensure unique IDs (prevents conflicts with deleted tasks)
     const newTask: Task = {
-      id: this.nextId++,
+      id: Date.now() + this.nextId++,
       text: text.trim(),
       completed: false,
-      order: maxOrder + 1
+      order: maxOrder + 1, // New tasks go to the end
+      expanded: false      // Start collapsed
     };
 
     const updatedTasks = [...currentTasks, newTask];
-    this.tasksSubject.next(updatedTasks);
-    this.saveTasksToStorage(updatedTasks);
+    this.stateService.saveTasksToStorage(updatedTasks);
   }
 
-  // Reorder tasks after drag and drop
-  reorderTasks(previousIndex: number, currentIndex: number): void {
-    const currentTasks = this.currentTasks;
-    const sortedTasks = this.getSortedTasks(currentTasks);
-
-    // Remove the task from its old position
-    const [movedTask] = sortedTasks.splice(previousIndex, 1);
-
-    // Insert it at the new position
-    sortedTasks.splice(currentIndex, 0, movedTask);
-
-    // Update order values based on new positions
-    const updatedTasks = sortedTasks.map((task, index) => ({
-      ...task,
-      order: index
-    }));
-
-    this.tasksSubject.next(updatedTasks);
-    this.saveTasksToStorage(updatedTasks);
-  }
-
-  // Toggle task completion
+  // Toggle completion status
   toggleTaskCompletion(taskId: number): void {
     const currentTasks = this.currentTasks;
     const updatedTasks = currentTasks.map(task =>
@@ -126,91 +106,131 @@ export class TaskService {
         : task
     );
 
-    this.tasksSubject.next(updatedTasks);
-    this.saveTasksToStorage(updatedTasks);
+    this.stateService.saveTasksToStorage(updatedTasks);
+  }
+
+  // Toggle subtask section expansion
+  toggleTaskExpansion(taskId: number): void {
+    const currentTasks = this.currentTasks;
+    const updatedTasks = currentTasks.map(task =>
+      task.id === taskId
+        ? { ...task, expanded: !task.expanded }
+        : task
+    );
+
+    this.stateService.saveTasksToStorage(updatedTasks);
   }
 
   // Delete task with animation support
   deleteTask(taskId: number): void {
     const currentTasks = this.currentTasks;
 
-    // First, mark task as falling for animation
+    // Step 1: Mark task as falling (triggers CSS animation)
     const tasksWithFalling = currentTasks.map(task =>
-      task.id === taskId
-        ? { ...task, isFalling: true }
-        : task
+      task.id === taskId ? { ...task, isFalling: true } : task
     );
-    this.tasksSubject.next(tasksWithFalling);
+    this.stateService.saveTasksToStorage(tasksWithFalling);
 
-    // Actually remove after animation delay
+    // Step 2: Actually remove after animation completes
     setTimeout(() => {
       const updatedTasks = this.currentTasks
-        .filter(task => task.id !== taskId)
-        .map((task, index) => ({ ...task, order: index })); // Reorder after deletion
+        .filter(task => task.id !== taskId)  // Remove the falling task
+        .map((task, index) => ({ ...task, order: index })); // Reorder remaining tasks
 
-      this.tasksSubject.next(updatedTasks);
-      this.saveTasksToStorage(updatedTasks);
+      this.stateService.saveTasksToStorage(updatedTasks);
       this.updateNextId();
-    }, 500);
+
+      // Force update to ensure all subscribers get the new data
+      this.stateService.updateTasks([...updatedTasks]);
+    }, 500); // Match CSS animation duration
   }
 
-  // Update task text
-  updateTask(taskId: number, newText: string): void {
-    if (!newText.trim()) return;
+  // Reorder tasks after drag and drop
+  reorderTasks(previousIndex: number, currentIndex: number): void {
+    const sortedTasks = [...this.currentTasks].sort((a, b) => a.order - b.order);
+    const [movedTask] = sortedTasks.splice(previousIndex, 1);
+    sortedTasks.splice(currentIndex, 0, movedTask);
 
-    const currentTasks = this.currentTasks;
-    const updatedTasks = currentTasks.map(task =>
-      task.id === taskId
-        ? { ...task, text: newText.trim() }
-        : task
-    );
-
-    this.tasksSubject.next(updatedTasks);
-    this.saveTasksToStorage(updatedTasks);
-  }
-
-  // Clear all completed tasks
-  clearCompleted(): void {
-    const currentTasks = this.currentTasks;
-    const incompleteTasks = currentTasks.filter(task => !task.completed);
-
-    // Reorder remaining tasks
-    const updatedTasks = incompleteTasks.map((task, index) => ({
+    // Update order values based on new positions
+    const updatedTasks = sortedTasks.map((task, index) => ({
       ...task,
       order: index
     }));
 
-    this.tasksSubject.next(updatedTasks);
-    this.saveTasksToStorage(updatedTasks);
+    this.stateService.saveTasksToStorage(updatedTasks);
+  }
+
+  // Remove all completed tasks
+  clearCompleted(): void {
+    const incompleteTasks = this.currentTasks.filter(task => !task.completed);
+    const updatedTasks = incompleteTasks.map((task, index) => ({
+      ...task,
+      order: index,
+      expanded: false // Collapse all after clear
+    }));
+
+    this.stateService.saveTasksToStorage(updatedTasks);
     this.updateNextId();
   }
 
-  // Check if a task exists
-  taskExists(taskId: number): boolean {
-    return this.currentTasks.some(task => task.id === taskId);
+  // Query methods using state service
+  taskHasSubtasks(taskId: number): boolean {
+    return this.stateService.taskHasSubtasks(taskId);
   }
 
-  // Get a single task by id
   getTaskById(taskId: number): Task | undefined {
     return this.currentTasks.find(task => task.id === taskId);
   }
 
-  // Private method to save tasks to localStorage
-  private saveTasksToStorage(tasks: Task[]): void {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+  taskExists(taskId: number): boolean {
+    return this.currentTasks.some(task => task.id === taskId);
   }
 
-  // Private method to load tasks from localStorage
-  private loadTasksFromStorage(): Task[] {
-    const savedTasks = localStorage.getItem('tasks');
-    return savedTasks ? JSON.parse(savedTasks) : [];
+  // Subtask-related queries (delegating to state service)
+  getSubtaskCount(taskId: number): Observable<number> {
+    return this.stateService.subtasks$.pipe(
+      map(subtasks => subtasks.filter(s => s.taskId === taskId).length)
+    );
   }
 
-  // Private method to update nextId based on current tasks
+  getCompletedSubtaskCount(taskId: number): Observable<number> {
+    return this.stateService.subtasks$.pipe(
+      map(subtasks => subtasks.filter(s => s.taskId === taskId && s.completed).length)
+    );
+  }
+
+  getTaskCompletionPercentage(taskId: number): Observable<number> {
+    return this.stateService.subtasks$.pipe(
+      map(subtasks => {
+        const taskSubtasks = subtasks.filter(s => s.taskId === taskId);
+        if (taskSubtasks.length === 0) return 0;
+        const completed = taskSubtasks.filter(s => s.completed).length;
+        return Math.round((completed / taskSubtasks.length) * 100);
+      })
+    );
+  }
+
+  // Synchronous version for template conditionals
+  hasSubtasks(taskId: number): boolean {
+    return this.stateService.taskHasSubtasks(taskId);
+  }
+
+  // Get full subtask list for a task (for advanced features)
+  getSubtasksForTask(taskId: number): Observable<Subtask[]> {
+    return this.stateService.subtasks$.pipe(
+      map(subtasks => subtasks
+        .filter(s => s.taskId === taskId)
+        .sort((a, b) => a.order - b.order)
+      )
+    );
+  }
+
+  // Private helper to maintain unique IDs
   private updateNextId(): void {
     const tasks = this.currentTasks;
+    // Add buffer to avoid conflicts with deleted task IDs
     this.nextId = tasks.length > 0
-      ? Math.max(...tasks.map(t => t.id)) + 1
-      : 0;
+      ? Math.max(...tasks.map(t => t.id)) + 1000
+      : Date.now(); // Start with timestamp if no tasks
   }
 }
