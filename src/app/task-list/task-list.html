@@ -26,7 +26,7 @@
             currentFilter === 'all' ? 'active-filter' : ''
         ]"
         (click)="setFilter('all')">
-        View All ({{ tasks.length }})
+        View All ({{ totalCount }})
     </button>
     <button
         class="filter-btn"
@@ -35,7 +35,7 @@
             currentFilter === 'active' ? 'active-filter' : ''
         ]"
         (click)="setFilter('active')">
-        Active ({{ getActiveCount() }})
+        Active ({{ activeCount }})
     </button>
     <button
         class="filter-btn"
@@ -44,9 +44,21 @@
             currentFilter === 'completed' ? 'active-filter' : ''
         ]"
         (click)="setFilter('completed')">
-        Completed ({{ getCompletedCount() }})
+        Completed ({{ completedCount }})
     </button>
 </div>
+
+<!-- Clear Completed Button (optional) -->
+@if (hasCompletedTasks) {
+    <div class="clear-container">
+        <button
+            class="clear-btn"
+            [ngClass]="currentTheme + '-button'"
+            (click)="clearCompleted()">
+            Clear Completed
+        </button>
+    </div>
+}
 
 <!-- Task List -->
 <div id="myUnOrdList">
