@@ -80,7 +80,7 @@ body {
     flex-direction: column;
     font-family: 'Work Sans', sans-serif;
     min-height: 100vh;
-    padding-top: 6px;
+    padding-top: 15px;
 }
 
 .container {
@@ -121,9 +121,9 @@ body.darker {
     flex-direction: column;
     justify-content: space-around;
     font-size: clamp(1.5rem, 8vw, 3rem);
-    min-height: 25vh;
+    min-height: 10vh;
     width: 100%;
-    padding-top: 5%;
+    padding-top: 10px;
 }
 
 /* Theme buttons */
@@ -173,8 +173,8 @@ body.darker {
     white-space: nowrap;
     overflow: hidden;
     letter-spacing: 0.20rem;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     width: fit-content;
     max-width: 90vw;
     padding: 0 10px;
@@ -206,6 +206,14 @@ body.darker {
 /* ==========================================================================
    FORM STYLES
    ========================================================================== */
+#form {
+    margin: 0 auto;
+    min-height: 10vh;
+    width: 100%;
+    max-width: 800px;
+    padding: 0 1rem;
+}
+
 form {
     display: flex;
     font-size: 1.7rem;
@@ -393,9 +401,10 @@ form button {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 20px 0;
+    margin: 20px auto;
     padding: 0 1rem;
     flex-wrap: wrap;
+    max-width: 800px;
 }
 
 .filter-btn {
@@ -441,7 +450,8 @@ form button {
 .clear-container {
     display: flex;
     justify-content: center;
-    margin: 10px 0 20px 0;
+    margin: 10px auto 20px;
+    max-width: 800px;
 }
 
 .clear-btn {
@@ -466,21 +476,24 @@ form button {
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 1200px;
     width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
 .task-list {
     min-width: 25%;
     list-style: none;
     width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 /* ==========================================================================
    TASK ITEM - CORE STYLES
    ========================================================================== */
 .task {
-    margin: 1rem;
+    margin: 1rem auto;
     font-size: 19px;
     display: flex;
     flex-direction: row;
@@ -491,6 +504,7 @@ form button {
     position: relative;
     cursor: default;
     width: 100%;
+    max-width: 100%;
     gap: 8px;
 }
 
@@ -512,7 +526,8 @@ form button {
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-width: 0; /* Prevents text overflow issues */
+    min-width: 0;
+    width: 100%;
 }
 
 /* Main task content row (text + action buttons) */
@@ -588,6 +603,7 @@ form button {
     width: 30px;
     height: 30px;
     margin-top: 5px;
+    margin-left: 0;
     cursor: grab;
     color: inherit;
     opacity: 0.5;
@@ -615,10 +631,11 @@ form button {
 /* Drag instructions */
 .drag-instructions {
     text-align: center;
-    margin: 10px 0;
+    margin: 10px auto;
     font-size: 0.9rem;
     opacity: 0.7;
     transition: opacity 0.3s ease;
+    max-width: 800px;
 }
 
 .drag-instructions i {
@@ -663,7 +680,7 @@ body.darker .drag-placeholder {
 .task-subtask-row {
     width: 100%;
     margin-top: 8px;
-    padding-left: 5px;
+    padding-left: 0;
 }
 
 /* Subtask toggle button */
@@ -710,6 +727,7 @@ body.light .subtask-count-badge {
     border-left: 2px solid currentColor;
     opacity: 0.9;
     transition: all 0.3s ease;
+    width: calc(100% - 1.5rem);
 }
 
 /* Subtask Header */
@@ -759,7 +777,8 @@ body.darker .completion-badge {
 
 /* Add Subtask Form */
 .add-subtask-form {
-    padding: 5px 10px;
+    padding: 5px 0;
+    width: 100%;
 }
 
 .add-subtask-form form {
@@ -767,6 +786,7 @@ body.darker .completion-badge {
     gap: 5px;
     margin: 0;
     padding: 0;
+    width: 100%;
 }
 
 .subtask-input {
@@ -777,6 +797,7 @@ body.darker .completion-badge {
     outline: none;
     border-radius: 15px;
     transition: all 0.2s ease;
+    width: 100%;
 }
 
 /* ==========================================================================
@@ -1175,6 +1196,7 @@ body.light .subtask-item:hover {
 
     .subtask-container {
         margin-left: 1rem;
+        width: calc(100% - 1rem);
     }
 
     .subtask-text {
