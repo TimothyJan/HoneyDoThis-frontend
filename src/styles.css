@@ -1,4 +1,6 @@
-/* ===== COLOR VARIABLES LEGEND ===== */
+/* ==========================================================================
+   COLOR VARIABLES LEGEND
+   ========================================================================== */
 :root {
     /* Theme Gradients - Standard */
     --gradient-standard-start: #575656;
@@ -63,7 +65,9 @@
     --footer-border: rgba(255, 255, 255, 0.2);
 }
 
-/* ===== BASE STYLES ===== */
+/* ==========================================================================
+   BASE STYLES
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
@@ -76,7 +80,7 @@ body {
     flex-direction: column;
     font-family: 'Work Sans', sans-serif;
     min-height: 100vh;
-    padding-top: 3%;
+    padding-top: 6px;
 }
 
 .container {
@@ -87,8 +91,9 @@ body {
     align-items: center;
 }
 
-/* ===== THEME STYLES ===== */
-/* Body light or darker themes */
+/* ==========================================================================
+   THEME STYLES
+   ========================================================================== */
 body.standard {
     background-image: linear-gradient(100deg, var(--gradient-standard-start), var(--gradient-standard-end));
     color: var(--text-standard);
@@ -107,7 +112,9 @@ body.darker {
     transition: 0.3s linear;
 }
 
-/* ===== HEADER STYLES ===== */
+/* ==========================================================================
+   HEADER STYLES
+   ========================================================================== */
 #header {
     align-items: center;
     display: flex;
@@ -119,7 +126,7 @@ body.darker {
     padding-top: 5%;
 }
 
-/* Theme buttons div */
+/* Theme buttons */
 .flexrow-container {
     align-items: center;
     align-self: flex-end;
@@ -158,13 +165,15 @@ body.darker {
     background-image: linear-gradient(100deg, var(--gradient-darker-start), var(--gradient-darker-end));
 }
 
-/* ===== TITLE ANIMATION ===== */
+/* ==========================================================================
+   TITLE ANIMATION
+   ========================================================================== */
 #title {
     border-right: solid 3px var(--border-cursor);
     white-space: nowrap;
     overflow: hidden;
     letter-spacing: 0.20rem;
-    margin-top: 50px;
+    margin-top: 20px;
     margin-bottom: 20px;
     width: fit-content;
     max-width: 90vw;
@@ -179,13 +188,11 @@ body.darker {
                darker-animated-cursor 750ms steps(20,end) infinite;
 }
 
-/* Text animation */
 @keyframes animated-text {
     from { width: 0%; }
     to { width: 100%; }
 }
 
-/* Cursor animations */
 @keyframes animated-cursor {
     from { border-right-color: var(--border-cursor); }
     to { border-right-color: transparent; }
@@ -196,7 +203,9 @@ body.darker {
     to { border-right-color: transparent; }
 }
 
-/* ===== FORM STYLES ===== */
+/* ==========================================================================
+   FORM STYLES
+   ========================================================================== */
 form {
     display: flex;
     font-size: 1.7rem;
@@ -260,7 +269,9 @@ form input.darker-input:hover {
     background-color: var(--input-hover-darker);
 }
 
-/* ===== BUTTON STYLES ===== */
+/* ==========================================================================
+   BUTTON STYLES
+   ========================================================================== */
 button {
     border: none;
     outline: none;
@@ -308,7 +319,149 @@ form button {
     min-width: 100px;
 }
 
-/* ===== TASK LIST STYLES ===== */
+/* ==========================================================================
+   ACTION BUTTONS (Check, Delete, Add Subtask)
+   ========================================================================== */
+.check-btn, .delete-btn, .subtask-add-btn {
+    font-size: 19px;
+    cursor: pointer;
+    width: 2em;
+    height: 2em;
+    border-radius: 80%;
+    margin: 0 5px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.check-btn i, .delete-btn i, .subtask-add-btn i {
+    font-size: 16px;
+    pointer-events: none;
+}
+
+/* Button themes - reuse existing button theme classes */
+.check-btn.standard-button,
+.delete-btn.standard-button,
+.subtask-add-btn.standard-button {
+    background-color: var(--button-bg-standard);
+    color: var(--button-text-standard);
+}
+
+.check-btn.light-button,
+.delete-btn.light-button,
+.subtask-add-btn.light-button {
+    background-color: var(--button-bg-light);
+    color: var(--button-text-light);
+}
+
+.check-btn.darker-button,
+.delete-btn.darker-button,
+.subtask-add-btn.darker-button {
+    background-color: var(--button-bg-darker);
+    color: var(--button-text-darker);
+}
+
+/* Hover states */
+.check-btn.standard-button:hover,
+.delete-btn.standard-button:hover,
+.subtask-add-btn.standard-button:hover {
+    background-color: var(--button-hover-standard);
+    box-shadow: var(--shadow-button) 0 0 10px;
+    transform: scale(1.05);
+}
+
+.check-btn.light-button:hover,
+.delete-btn.light-button:hover,
+.subtask-add-btn.light-button:hover {
+    background-color: var(--button-hover-light);
+    transform: scale(1.05);
+}
+
+.check-btn.darker-button:hover,
+.delete-btn.darker-button:hover,
+.subtask-add-btn.darker-button:hover {
+    background-color: var(--button-hover-darker);
+    transform: scale(1.05);
+}
+
+/* ==========================================================================
+   FILTER SECTION
+   ========================================================================== */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    padding: 0 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 20px;
+    min-width: 100px;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.filter-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+.filter-btn.active-filter {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px currentColor;
+}
+
+/* Theme-specific active filter styles */
+.filter-btn.standard-button.active-filter {
+    background-color: var(--button-hover-standard);
+    color: var(--button-text-standard);
+    border: 1px solid var(--text-standard);
+}
+
+.filter-btn.light-button.active-filter {
+    background-color: var(--button-hover-light);
+    color: var(--button-text-light);
+    border: 1px solid var(--text-light);
+}
+
+.filter-btn.darker-button.active-filter {
+    background-color: var(--button-hover-darker);
+    color: var(--button-text-darker);
+    border: 1px solid var(--text-darker);
+}
+
+/* Clear completed button */
+.clear-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 20px 0;
+}
+
+.clear-btn {
+    padding: 8px 20px;
+    font-size: 14px;
+    border-radius: 20px;
+    min-width: 150px;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.clear-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 0 10px currentColor;
+}
+
+/* ==========================================================================
+   TASK LIST - MAIN CONTAINER
+   ========================================================================== */
 #myUnOrdList {
     display: flex;
     justify-content: center;
@@ -323,21 +476,72 @@ form button {
     width: 100%;
 }
 
+/* ==========================================================================
+   TASK ITEM - CORE STYLES
+   ========================================================================== */
 .task {
     margin: 1rem;
     font-size: 19px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.25em 0.5em;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0.75em 1em;
     border-radius: 30px;
-    transition: background-color 200ms ease-in-out;
+    transition: background-color 200ms ease-in-out, all 0.3s ease;
     position: relative;
     cursor: default;
-    transition: all 0.3s ease;
+    width: 100%;
+    gap: 8px;
 }
 
-/* Drag and drop styles */
+/* Task theme backgrounds */
+.standard-task {
+    background-color: var(--task-bg-standard);
+}
+
+.light-task {
+    background-color: var(--task-bg-light);
+}
+
+.darker-task {
+    background-color: var(--task-bg-darker);
+}
+
+/* Task content wrapper - contains all task content next to drag handle */
+.task-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0; /* Prevents text overflow issues */
+}
+
+/* Main task content row (text + action buttons) */
+.task-main-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+}
+
+.task .task-item {
+    padding: 7px;
+    font-size: 20px;
+    flex: 1;
+    border-radius: 30px;
+    overflow-wrap: anywhere;
+}
+
+/* Task action buttons container */
+.task-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   DRAG AND DROP STYLES
+   ========================================================================== */
 .task[drag] {
     cursor: grab;
 }
@@ -383,11 +587,12 @@ form button {
     justify-content: center;
     width: 30px;
     height: 30px;
-    margin-right: 5px;
+    margin-top: 5px;
     cursor: grab;
     color: inherit;
     opacity: 0.5;
     transition: opacity 0.2s ease;
+    flex-shrink: 0;
 }
 
 .drag-handle:hover {
@@ -405,12 +610,6 @@ form button {
 
 .task.drag-disabled .drag-handle {
     display: none;
-}
-
-/* Task actions container */
-.task-actions {
-    display: flex;
-    gap: 5px;
 }
 
 /* Drag instructions */
@@ -458,52 +657,314 @@ body.darker .drag-placeholder {
     border-color: var(--text-darker);
 }
 
-/* Responsive adjustments */
-@media only screen and (max-width: 500px) {
-    .drag-handle {
-        width: 20px;
-        font-size: 14px;
-    }
-
-    .drag-instructions {
-        font-size: 0.8rem;
-    }
+/* ==========================================================================
+   SUBTASK SECTION (WITHIN TASK)
+   ========================================================================== */
+.task-subtask-row {
+    width: 100%;
+    margin-top: 8px;
+    padding-left: 5px;
 }
 
-/* Items themes */
-.standard-task {
-    background-color: var(--task-bg-standard);
+/* Subtask toggle button */
+.subtask-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    min-width: unset;
+    margin-bottom: 5px;
+    opacity: 0.9;
 }
 
-.light-task {
-    background-color: var(--task-bg-light);
+.subtask-toggle-btn:hover {
+    opacity: 1;
+    transform: translateY(-1px);
 }
 
-.darker-task {
-    background-color: var(--task-bg-darker);
+.subtask-toggle-btn i {
+    font-size: 11px;
 }
 
-.task .task-item {
-    padding: 7px;
-    font-size: 20px;
-    flex: 1;
-    border-radius: 30px;
-    overflow-wrap: anywhere;
+/* Subtask count badge */
+.subtask-count-badge {
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 2px;
 }
 
-.check-btn, .delete-btn {
-    font-size: 19px;
+body.light .subtask-count-badge {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   SUBTASK CONTAINER (EXPANDED VIEW)
+   ========================================================================== */
+.subtask-container {
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+    border-left: 2px solid currentColor;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+/* Subtask Header */
+.subtask-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
     cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.subtask-header:hover {
+    opacity: 1;
+}
+
+.subtask-header i {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+/* Subtask Summary */
+.subtask-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.completion-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: currentColor;
+    color: var(--task-bg-standard);
+    opacity: 0.8;
+}
+
+body.light .completion-badge {
+    color: var(--text-light);
+}
+
+body.darker .completion-badge {
+    color: var(--text-darker);
+}
+
+/* Add Subtask Form */
+.add-subtask-form {
+    padding: 5px 10px;
+}
+
+.add-subtask-form form {
+    display: flex;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+}
+
+.subtask-input {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    border-radius: 15px;
+    transition: all 0.2s ease;
+}
+
+/* ==========================================================================
+   SUBTASK ADD BUTTON - Make it match action buttons
+   ========================================================================== */
+.add-subtask-btn {
     width: 2em;
     height: 2em;
     border-radius: 80%;
-    margin: 0 5px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    padding: 0;
+    min-width: unset;
 }
 
-.fa-trash, .fa-check {
+.add-subtask-btn i {
+    font-size: 14px;
     pointer-events: none;
 }
 
+/* Theme-specific styles (these will be overridden by the button classes) */
+.add-subtask-btn.standard-button {
+    background-color: var(--button-bg-standard);
+    color: var(--button-text-standard);
+}
+
+.add-subtask-btn.light-button {
+    background-color: var(--button-bg-light);
+    color: var(--button-text-light);
+}
+
+.add-subtask-btn.darker-button {
+    background-color: var(--button-bg-darker);
+    color: var(--button-text-darker);
+}
+
+/* Hover states */
+.add-subtask-btn.standard-button:hover {
+    background-color: var(--button-hover-standard);
+    box-shadow: var(--shadow-button) 0 0 10px;
+    transform: scale(1.05);
+}
+
+.add-subtask-btn.light-button:hover {
+    background-color: var(--button-hover-light);
+    transform: scale(1.05);
+}
+
+.add-subtask-btn.darker-button:hover {
+    background-color: var(--button-hover-darker);
+    transform: scale(1.05);
+}
+
+/* Subtask List */
+.subtask-list {
+    padding: 5px 0;
+}
+
+/* Subtask Item */
+.subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    margin: 3px 0;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.subtask-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.light .subtask-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Subtask completed state */
+.subtask-item.completed .subtask-text {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* Subtask Drag Handle */
+.subtask-drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    cursor: grab;
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+    flex-shrink: 0;
+}
+
+.subtask-drag-handle:hover {
+    opacity: 0.8;
+}
+
+.subtask-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Subtask Check Button */
+.subtask-check {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0;
+    min-width: unset;
+    flex-shrink: 0;
+}
+
+.subtask-check i {
+    font-size: 14px;
+}
+
+/* Subtask Text */
+.subtask-text {
+    flex: 1;
+    font-size: 15px;
+    padding: 3px 0;
+    overflow-wrap: anywhere;
+}
+
+/* Subtask Delete Button */
+.subtask-delete {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0;
+    min-width: unset;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+    flex-shrink: 0;
+}
+
+.subtask-delete:hover {
+    opacity: 1;
+}
+
+.subtask-delete i {
+    font-size: 12px;
+}
+
+/* Subtask Drag and Drop */
+.subtask-item.cdk-drag-preview {
+    background: var(--task-bg-standard);
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0.9;
+    transform: scale(1.02);
+}
+
+.subtask-item.cdk-drag-placeholder {
+    opacity: 0.2;
+    min-height: 40px;
+}
+
+.subtask-list.cdk-drop-list-dragging .subtask-item:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Animation for falling */
+.subtask-item.fall {
+    transition: 0.5s;
+    transform: translateY(20rem) rotateZ(45deg);
+    opacity: 0;
+}
+
+/* ==========================================================================
+   TASK STATE STYLES
+   ========================================================================== */
 .completed {
     transition: 0.2s;
     text-decoration: line-through;
@@ -516,62 +977,13 @@ body.darker .drag-placeholder {
     opacity: 0;
 }
 
-/* Filter Container */
-.filter-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin: 20px 0;
-    padding: 0 1rem;
-    flex-wrap: wrap;
-}
-
-/* Filter Buttons */
-.filter-btn {
-    padding: 8px 16px;
-    font-size: 14px;
-    border-radius: 20px;
-    min-width: 100px;
-    transition: all 0.3s ease;
-    opacity: 0.8;
-}
-
-.filter-btn:hover {
-    opacity: 1;
-    transform: translateY(-2px);
-}
-
-/* Active filter state */
-.filter-btn.active-filter {
-    opacity: 1;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px currentColor;
-}
-
-/* Theme-specific active filter styles */
-.filter-btn.standard-button.active-filter {
-    background-color: var(--button-hover-standard);
-    color: var(--button-text-standard);
-    border: 1px solid var(--text-standard);
-}
-
-.filter-btn.light-button.active-filter {
-    background-color: var(--button-hover-light);
-    color: var(--button-text-light);
-    border: 1px solid var(--text-light);
-}
-
-.filter-btn.darker-button.active-filter {
-    background-color: var(--button-hover-darker);
-    color: var(--button-text-darker);
-    border: 1px solid var(--text-darker);
-}
-
 /* Empty state styling */
 .task.empty-state {
     justify-content: center;
     opacity: 0.7;
     cursor: default;
+    display: flex;
+    align-items: center;
 }
 
 .task.empty-state .task-item {
@@ -584,43 +996,9 @@ body.darker .drag-placeholder {
     transform: none;
 }
 
-/* Responsive adjustments */
-@media only screen and (max-width: 500px) {
-    .filter-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .filter-btn {
-        width: 80%;
-        max-width: 200px;
-    }
-}
-
-/* Clear completed button container */
-.clear-container {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0 20px 0;
-}
-
-/* Clear button styling */
-.clear-btn {
-    padding: 8px 20px;
-    font-size: 14px;
-    border-radius: 20px;
-    min-width: 150px;
-    transition: all 0.3s ease;
-    opacity: 0.8;
-}
-
-.clear-btn:hover {
-    opacity: 1;
-    transform: translateY(-2px);
-    box-shadow: 0 0 10px currentColor;
-}
-
-/* ===== FOOTER STYLES ===== */
+/* ==========================================================================
+   FOOTER STYLES
+   ========================================================================== */
 #footer {
     position: relative;
     width: 100%;
@@ -660,7 +1038,7 @@ body.darker .drag-placeholder {
 
 #footer .social-icon {
     display: flex;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     gap: 20px;
     justify-content: center;
 }
@@ -693,21 +1071,13 @@ body.darker .drag-placeholder {
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Hover effects - consistent across themes */
+/* Hover effects */
 #footer .social-item:hover {
     transform: translateY(-5px) rotate(10deg);
 }
 
-#footer .social-item.standard-social:hover {
-    background: var(--footer-hover);
-    border-color: var(--footer-hover);
-}
-
-#footer .social-item.light-social:hover {
-    background: var(--footer-hover);
-    border-color: var(--footer-hover);
-}
-
+#footer .social-item.standard-social:hover,
+#footer .social-item.light-social:hover,
 #footer .social-item.darker-social:hover {
     background: var(--footer-hover);
     border-color: var(--footer-hover);
@@ -749,7 +1119,30 @@ body.darker .drag-placeholder {
     transition: color 0.3s linear;
 }
 
-/* Responsive adjustments */
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media only screen and (max-width: 1000px) {
+    .flexrow-container {
+        align-self: unset;
+        margin-right: 0;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    #header {
+        font-size: 2rem;
+    }
+
+    #title {
+        animation: animated-text 3s steps(16,end) 0.5s 1 normal both,
+                   animated-cursor 750ms steps(16,end) infinite;
+        font-size: clamp(1.5rem, 7vw, 2rem);
+        margin-bottom: 10px;
+        margin-top: 30px;
+    }
+}
+
 @media only screen and (max-width: 768px) {
     #footer h2 {
         font-size: 1.5rem;
@@ -758,4 +1151,74 @@ body.darker .drag-placeholder {
     #footer p {
         font-size: 1rem;
     }
+}
+
+@media only screen and (max-width: 500px) {
+    .drag-handle {
+        width: 20px;
+        font-size: 14px;
+    }
+
+    .drag-instructions {
+        font-size: 0.8rem;
+    }
+
+    .filter-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .filter-btn {
+        width: 80%;
+        max-width: 200px;
+    }
+
+    .subtask-container {
+        margin-left: 1rem;
+    }
+
+    .subtask-text {
+        font-size: 14px;
+    }
+
+    .subtask-check, .subtask-delete {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    #header {
+        font-size: 1.5rem;
+    }
+
+    #title {
+        animation: animated-text 3.5s steps(16,end) 0.5s 1 normal both,
+                   animated-cursor 750ms steps(16,end) infinite;
+        font-size: clamp(1.2rem, 6vw, 1.5rem);
+    }
+
+    form {
+        align-items: center;
+        flex-direction: column;
+    }
+
+    form input {
+        border-radius: 17px;
+    }
+
+    form button {
+        border-radius: 15px;
+        margin-top: 15px;
+        width: 50%;
+    }
+
+    form > button.light-button {
+        box-shadow: 0 0 5px var(--shadow-light);
+    }
+}
+
+/* Hidden utility class */
+.hidden {
+    display: none !important;
 }

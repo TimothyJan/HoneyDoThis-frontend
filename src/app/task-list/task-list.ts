@@ -1,12 +1,15 @@
+// Main task list component - displays tasks with filtering, drag-drop, and subtasks
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
+import { Observable, Subscription } from 'rxjs';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ThemeType } from '../models/themeType.model';
 import { Task, FilterType } from '../models/task.model';
 import { ThemeService } from '../services/theme-service';
 import { TaskService } from '../services/task-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SubtaskList } from "../subtask-list/subtask-list";
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-task-list',
@@ -14,34 +17,52 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     FormsModule,
-    DragDropModule  // Add this for drag and drop
+    DragDropModule,
+    SubtaskList
   ],
   templateUrl: './task-list.html',
   styleUrl: './task-list.css',
 })
 export class TaskList implements OnInit, OnDestroy {
+  // Form input
   newTaskText: string = '';
-  tasks: Task[] = [];
-  filteredTasks: Task[] = [];
+
+  // Data arrays
+  tasks: Task[] = [];           // All tasks
+  filteredTasks: Task[] = [];    // Tasks after applying current filter
+
+  // UI state
   currentTheme: ThemeType = 'standard';
   currentFilter: FilterType = 'all';
 
-  // Count observables
-  activeCount: number = 0;
-  completedCount: number = 0;
-  totalCount: number = 0;
+  // Observables for reactive count display (using async pipe in template)
+  activeCount$: Observable<number>;
+  completedCount$: Observable<number>;
+  totalCount$: Observable<number>;
+  hasCompletedTasks$: Observable<boolean>; // Derived observable for clear button
 
-  // Flag to enable/disable drag and drop based on filter
+  // Computed property - disable drag when not viewing all tasks
   get dragDisabled(): boolean {
     return this.currentFilter !== 'all';
   }
 
+  // Subscription management to prevent memory leaks
   private subscriptions: Subscription = new Subscription();
 
   constructor(
     private themeService: ThemeService,
     private taskService: TaskService
-  ) {}
+  ) {
+    // Initialize observables in constructor
+    this.activeCount$ = this.taskService.getActiveCount();
+    this.completedCount$ = this.taskService.getCompletedCount();
+    this.totalCount$ = this.taskService.getTotalCount();
+
+    // Derived observable - true when there are completed tasks
+    this.hasCompletedTasks$ = this.completedCount$.pipe(
+      map(count => count > 0)
+    );
+  }
 
   ngOnInit(): void {
     // Subscribe to theme changes
@@ -58,43 +79,24 @@ export class TaskList implements OnInit, OnDestroy {
       })
     );
 
-    // Subscribe to all tasks for the main list (if needed)
+    // Subscribe to all tasks for reference (used in hasSubtasks checks)
     this.subscriptions.add(
       this.taskService.tasks$.subscribe(tasks => {
         this.tasks = tasks;
       })
     );
-
-    // Subscribe to counts
-    this.subscriptions.add(
-      this.taskService.getActiveCount().subscribe(count => {
-        this.activeCount = count;
-      })
-    );
-
-    this.subscriptions.add(
-      this.taskService.getCompletedCount().subscribe(count => {
-        this.completedCount = count;
-      })
-    );
-
-    this.subscriptions.add(
-      this.taskService.getTotalCount().subscribe(count => {
-        this.totalCount = count;
-      })
-    );
   }
 
   ngOnDestroy(): void {
-    // Clean up all subscriptions
+    // Clean up all subscriptions when component is destroyed
     this.subscriptions.unsubscribe();
   }
 
-  // Add new task
+  // Create new task
   addTask(event: Event): void {
-    event.preventDefault();
+    event.preventDefault(); // Prevent form submission
     this.taskService.addTask(this.newTaskText);
-    this.newTaskText = '';
+    this.newTaskText = ''; // Clear input
   }
 
   // Toggle task completion
@@ -102,24 +104,22 @@ export class TaskList implements OnInit, OnDestroy {
     this.taskService.toggleTaskCompletion(taskId);
   }
 
-  // Delete task with animation
+  // Delete task (animation handled in service)
   deleteTask(taskId: number): void {
     this.taskService.deleteTask(taskId);
   }
 
   // Handle drag and drop reordering
   drop(event: CdkDragDrop<Task[]>): void {
-    if (this.dragDisabled) return;
-
-    // Only allow reordering when viewing all tasks
+    if (this.dragDisabled) return; // Can't reorder when filtered
     this.taskService.reorderTasks(event.previousIndex, event.currentIndex);
   }
 
-  // Change filter
+  // Change active filter
   setFilter(filter: FilterType): void {
     this.currentFilter = filter;
 
-    // Re-subscribe to filtered tasks with new filter
+    // Resubscribe to filtered tasks with new filter
     this.subscriptions.add(
       this.taskService.getFilteredTasks(filter).subscribe(tasks => {
         this.filteredTasks = tasks;
@@ -127,13 +127,33 @@ export class TaskList implements OnInit, OnDestroy {
     );
   }
 
-  // Clear all completed tasks
+  // Remove all completed tasks
   clearCompleted(): void {
     this.taskService.clearCompleted();
   }
 
-  // Check if there are any completed tasks
+  // Legacy method - kept for compatibility, but not used (using async pipe instead)
   get hasCompletedTasks(): boolean {
-    return this.completedCount > 0;
+    return false; // Handled by async pipe in template
+  }
+
+  // Subtask-related methods
+  addSubtaskToTask(taskId: number): void {
+    const task = this.tasks.find(t => t.id === taskId);
+    if (task && !task.expanded) {
+      this.toggleTaskExpanded(taskId); // Expand to show subtask form
+    }
+  }
+
+  hasSubtasks(taskId: number): boolean {
+    return this.taskService.taskHasSubtasks(taskId);
+  }
+
+  getSubtaskCount(taskId: number): Observable<number> {
+    return this.taskService.getSubtaskCount(taskId);
+  }
+
+  toggleTaskExpanded(taskId: number): void {
+    this.taskService.toggleTaskExpansion(taskId);
   }
 }

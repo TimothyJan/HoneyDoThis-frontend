@@ -1,0 +1,87 @@
+<!-- Main container for subtask section -->
+<div class="subtask-container" [class.expanded]="expanded">
+
+    <!-- Header section - only shown when subtasks exist -->
+    @if (hasSubtasks) {
+        <div class="subtask-header" (click)="toggleExpand()">
+            <!-- Expand/collapse chevron icon -->
+            <i class="fas" [class.fa-chevron-right]="!expanded" [class.fa-chevron-down]="expanded"></i>
+            <span class="subtask-summary">
+                <!-- Show progress: completed/total -->
+                {{ completedCount }}/{{ subtaskCount }} subtasks
+                <!-- Show percentage badge when progress > 0 -->
+                @if (completionPercentage > 0) {
+                    <span class="completion-badge">{{ completionPercentage }}%</span>
+                }
+            </span>
+        </div>
+    }
+
+    <!-- Add subtask form - always visible for easy adding -->
+    <div class="add-subtask-form">
+        <form (ngSubmit)="addSubtask($event)">
+            <input
+                type="text"
+                placeholder="Add a subtask..."
+                [(ngModel)]="newSubtaskText"
+                name="subtaskInput"
+                [ngClass]="currentTheme + '-input'"
+                class="subtask-input">
+            <button
+                type="submit"
+                [ngClass]="currentTheme + '-button'"
+                class="add-subtask-btn">
+                <i class="fas fa-plus"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Expanded subtask list with drag-drop -->
+    @if (expanded && hasSubtasks) {
+        <div class="subtask-list"
+             cdkDropList
+             (cdkDropListDropped)="drop($event)">
+
+            <!-- Iterate through subtasks -->
+            @for(subtask of subtasks; track subtask.id) {
+                <div class="subtask-item"
+                     cdkDrag
+                     [class.completed]="subtask.completed"
+                     [class.fall]="subtask.isFalling">
+
+                    <!-- Drag handle for reordering -->
+                    <div class="subtask-drag-handle" cdkDragHandle>
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+
+                    <!-- Check button - shows different icons based on completion -->
+                    <button
+                        class="subtask-check"
+                        [ngClass]="currentTheme + '-button'"
+                        (click)="toggleComplete(subtask.id)"
+                        [attr.aria-label]="subtask.completed ? 'Mark incomplete' : 'Mark complete'">
+
+                        <!-- Outline circle for incomplete, filled check for complete -->
+                        @if (!subtask.completed) {
+                            <i class="far fa-circle"></i>
+                        } @else {
+                            <i class="fas fa-check-circle"></i>
+                        }
+                    </button>
+
+                    <!-- Subtask text content -->
+                    <span class="subtask-text">{{ subtask.text }}</span>
+
+                    <!-- Delete button -->
+                    <button
+                        class="subtask-delete"
+                        [ngClass]="currentTheme + '-button'"
+                        (click)="deleteSubtask(subtask.id)"
+                        aria-label="Delete subtask">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            }
+        </div>
+    }
+</div>
