@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription, combineLatest } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 import { ThemeType } from '../models/themeType.model';
 import { Task, FilterType } from '../models/task.model';
 import { ThemeService } from '../services/theme-service';
@@ -12,7 +13,8 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    DragDropModule  // Add this for drag and drop
   ],
   templateUrl: './task-list.html',
   styleUrl: './task-list.css',
@@ -28,6 +30,11 @@ export class TaskList implements OnInit, OnDestroy {
   activeCount: number = 0;
   completedCount: number = 0;
   totalCount: number = 0;
+
+  // Flag to enable/disable drag and drop based on filter
+  get dragDisabled(): boolean {
+    return this.currentFilter !== 'all';
+  }
 
   private subscriptions: Subscription = new Subscription();
 
@@ -98,6 +105,14 @@ export class TaskList implements OnInit, OnDestroy {
   // Delete task with animation
   deleteTask(taskId: number): void {
     this.taskService.deleteTask(taskId);
+  }
+
+  // Handle drag and drop reordering
+  drop(event: CdkDragDrop<Task[]>): void {
+    if (this.dragDisabled) return;
+
+    // Only allow reordering when viewing all tasks
+    this.taskService.reorderTasks(event.previousIndex, event.currentIndex);
   }
 
   // Change filter

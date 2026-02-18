@@ -13,7 +13,14 @@ export class TaskService {
   constructor() {
     // Initialize tasks from localStorage
     const savedTasks = this.loadTasksFromStorage();
-    this.tasksSubject = new BehaviorSubject<Task[]>(savedTasks);
+
+    // Ensure all tasks have an order property (for backward compatibility)
+    const tasksWithOrder = savedTasks.map((task, index) => ({
+      ...task,
+      order: task.order !== undefined ? task.order : index
+    }));
+
+    this.tasksSubject = new BehaviorSubject<Task[]>(tasksWithOrder);
     this.tasks$ = this.tasksSubject.asObservable();
 
     // Set nextId based on existing tasks
@@ -25,17 +32,23 @@ export class TaskService {
     return this.tasksSubject.getValue();
   }
 
-  // Get filtered tasks as observable
+  // Get tasks sorted by order
+  private getSortedTasks(tasks: Task[]): Task[] {
+    return [...tasks].sort((a, b) => a.order - b.order);
+  }
+
+  // Get filtered tasks as observable (sorted by order)
   getFilteredTasks(filter: FilterType): Observable<Task[]> {
     return this.tasks$.pipe(
       map(tasks => {
+        const filtered = this.getSortedTasks(tasks);
         switch (filter) {
           case 'active':
-            return tasks.filter(task => !task.completed);
+            return filtered.filter(task => !task.completed);
           case 'completed':
-            return tasks.filter(task => task.completed);
+            return filtered.filter(task => task.completed);
           default:
-            return [...tasks];
+            return filtered;
         }
       })
     );
@@ -62,18 +75,43 @@ export class TaskService {
     );
   }
 
-  // Add new task
+  // Add new task (adds to the end)
   addTask(text: string): void {
     if (!text.trim()) return;
+
+    const currentTasks = this.currentTasks;
+    const maxOrder = currentTasks.length > 0
+      ? Math.max(...currentTasks.map(t => t.order))
+      : -1;
 
     const newTask: Task = {
       id: this.nextId++,
       text: text.trim(),
-      completed: false
+      completed: false,
+      order: maxOrder + 1
     };
 
-    const currentTasks = this.currentTasks;
     const updatedTasks = [...currentTasks, newTask];
+    this.tasksSubject.next(updatedTasks);
+    this.saveTasksToStorage(updatedTasks);
+  }
+
+  // Reorder tasks after drag and drop
+  reorderTasks(previousIndex: number, currentIndex: number): void {
+    const currentTasks = this.currentTasks;
+    const sortedTasks = this.getSortedTasks(currentTasks);
+
+    // Remove the task from its old position
+    const [movedTask] = sortedTasks.splice(previousIndex, 1);
+
+    // Insert it at the new position
+    sortedTasks.splice(currentIndex, 0, movedTask);
+
+    // Update order values based on new positions
+    const updatedTasks = sortedTasks.map((task, index) => ({
+      ...task,
+      order: index
+    }));
 
     this.tasksSubject.next(updatedTasks);
     this.saveTasksToStorage(updatedTasks);
@@ -106,7 +144,10 @@ export class TaskService {
 
     // Actually remove after animation delay
     setTimeout(() => {
-      const updatedTasks = this.currentTasks.filter(task => task.id !== taskId);
+      const updatedTasks = this.currentTasks
+        .filter(task => task.id !== taskId)
+        .map((task, index) => ({ ...task, order: index })); // Reorder after deletion
+
       this.tasksSubject.next(updatedTasks);
       this.saveTasksToStorage(updatedTasks);
       this.updateNextId();
@@ -131,14 +172,20 @@ export class TaskService {
   // Clear all completed tasks
   clearCompleted(): void {
     const currentTasks = this.currentTasks;
-    const updatedTasks = currentTasks.filter(task => !task.completed);
+    const incompleteTasks = currentTasks.filter(task => !task.completed);
+
+    // Reorder remaining tasks
+    const updatedTasks = incompleteTasks.map((task, index) => ({
+      ...task,
+      order: index
+    }));
 
     this.tasksSubject.next(updatedTasks);
     this.saveTasksToStorage(updatedTasks);
     this.updateNextId();
   }
 
-  // Check if a task exists (optional utility)
+  // Check if a task exists
   taskExists(taskId: number): boolean {
     return this.currentTasks.some(task => task.id === taskId);
   }
