@@ -42,9 +42,9 @@
     --button-hover-darker: #001f29;
 
     /* Todo Item Backgrounds */
-    --todo-bg-standard: rgb(26, 27, 27);
-    --todo-bg-light: #AEB1B4;
-    --todo-bg-darker: #01394c;
+    --task-bg-standard: rgb(26, 27, 27);
+    --task-bg-light: #AEB1B4;
+    --task-bg-darker: #01394c;
 
     /* Border Colors */
     --border-light: #d1dae3;
@@ -317,13 +317,13 @@ form button {
     width: 100%;
 }
 
-.todo-list {
+.task-list {
     min-width: 25%;
     list-style: none;
     width: 100%;
 }
 
-.todo {
+.task {
     margin: 1rem;
     font-size: 19px;
     display: flex;
@@ -335,19 +335,19 @@ form button {
 }
 
 /* Items themes */
-.standard-todo {
-    background-color: var(--todo-bg-standard);
+.standard-task {
+    background-color: var(--task-bg-standard);
 }
 
-.light-todo {
-    background-color: var(--todo-bg-light);
+.light-task {
+    background-color: var(--task-bg-light);
 }
 
-.darker-todo {
-    background-color: var(--todo-bg-darker);
+.darker-task {
+    background-color: var(--task-bg-darker);
 }
 
-.todo .todo-item {
+.task .task-item {
     padding: 7px;
     font-size: 20px;
     flex: 1;
@@ -380,24 +380,92 @@ form button {
     opacity: 0;
 }
 
+/* Filter Container */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    padding: 0 1rem;
+    flex-wrap: wrap;
+}
+
+/* Filter Buttons */
+.filter-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 20px;
+    min-width: 100px;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.filter-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+/* Active filter state */
+.filter-btn.active-filter {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px currentColor;
+}
+
+/* Theme-specific active filter styles */
+.filter-btn.standard-button.active-filter {
+    background-color: var(--button-hover-standard);
+    color: var(--button-text-standard);
+    border: 1px solid var(--text-standard);
+}
+
+.filter-btn.light-button.active-filter {
+    background-color: var(--button-hover-light);
+    color: var(--button-text-light);
+    border: 1px solid var(--text-light);
+}
+
+.filter-btn.darker-button.active-filter {
+    background-color: var(--button-hover-darker);
+    color: var(--button-text-darker);
+    border: 1px solid var(--text-darker);
+}
+
+/* Empty state styling */
+.task.empty-state {
+    justify-content: center;
+    opacity: 0.7;
+    cursor: default;
+}
+
+.task.empty-state .task-item {
+    text-align: center;
+    font-style: italic;
+}
+
+.task.empty-state:hover {
+    opacity: 0.7;
+    transform: none;
+}
+
+/* Responsive adjustments */
+@media only screen and (max-width: 500px) {
+    .filter-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .filter-btn {
+        width: 80%;
+        max-width: 200px;
+    }
+}
+
 /* ===== FOOTER STYLES ===== */
 #footer {
     position: relative;
     width: 100%;
     transition: all 0.3s linear;
-}
-
-/* Theme-specific background adjustments */
-#footer.standard {
-    /* Standard theme already has gradient from body, so minimal changes */
-}
-
-#footer.light {
-    /* Light theme adjustments if needed */
-}
-
-#footer.darker {
-    /* Darker theme adjustments if needed */
 }
 
 #footer .footer {

@@ -1,12 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ThemeType } from '../models/themeType.model';
+import { Task, FilterType } from '../models/task.model';
 import { ThemeService } from '../services/theme-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-task-list',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule
@@ -15,13 +17,14 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './task-list.css',
 })
 export class TaskList implements OnInit, OnDestroy {
-  newTodoText: string = '';
-  todos: Task[] = [];
+  newTaskText: string = '';
+  tasks: Task[] = [];
+  filteredTasks: Task[] = [];
   currentTheme: ThemeType = 'standard';
-  currentDateTime: string = '';
+  currentFilter: FilterType = 'all';
 
   private themeSubscription: Subscription;
-  private dateTimeInterval: any;
+  private nextId: number = 0;
 
   constructor(private themeService: ThemeService) {
     // Subscribe to theme changes
@@ -31,72 +34,113 @@ export class TaskList implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadTodos();
-    this.updateDateTime();
-    // Update date time every second
-    this.dateTimeInterval = setInterval(() => this.updateDateTime(), 1000);
+    this.loadTasks();
+    this.updateFilteredTasks();
   }
 
   ngOnDestroy(): void {
-    // Clean up subscriptions and intervals
+    // Clean up subscriptions
     if (this.themeSubscription) {
       this.themeSubscription.unsubscribe();
     }
-    if (this.dateTimeInterval) {
-      clearInterval(this.dateTimeInterval);
-    }
   }
 
-  // Update date time display
-  updateDateTime(): void {
-    this.currentDateTime = new Date().toLocaleString();
-  }
-
-  // Add new todo
-  addToDo(event: Event): void {
+  // Add new task
+  addTask(event: Event): void {
     event.preventDefault();
 
-    const todoText = this.newTodoText.trim();
-    if (todoText === '') {
+    const taskText = this.newTaskText.trim();
+    if (taskText === '') {
       alert('You must write something!');
       return;
     }
 
-    const todoObject: Task = { text: todoText, completed: false };
-    this.todos.push(todoObject);
-    this.saveTodosToLocalStorage();
+    const taskObject: Task = {
+      id: this.nextId++,
+      text: taskText,
+      completed: false
+    };
+    this.tasks.push(taskObject);
+    this.saveTasksToLocalStorage();
+    this.updateFilteredTasks();
 
-    this.newTodoText = '';
+    this.newTaskText = '';
   }
 
-  // Toggle todo completion
-  toggleComplete(index: number): void {
-    this.todos[index].completed = !this.todos[index].completed;
-    this.saveTodosToLocalStorage();
+  // Toggle task completion
+  toggleComplete(taskId: number): void {
+    const task = this.tasks.find(t => t.id === taskId);
+    if (task) {
+      task.completed = !task.completed;
+      this.saveTasksToLocalStorage();
+      this.updateFilteredTasks();
+    }
   }
 
-  // Delete todo with animation
-  deleteTodo(index: number): void {
-    // Add falling animation class
-    this.todos[index].isFalling = true;
+  // Delete task with animation
+  deleteTask(taskId: number): void {
+    const index = this.tasks.findIndex(t => t.id === taskId);
+    if (index !== -1) {
+      // Add falling animation class
+      this.tasks[index].isFalling = true;
 
-    // Remove after animation
-    setTimeout(() => {
-      this.todos.splice(index, 1);
-      this.saveTodosToLocalStorage();
-    }, 500);
+      // Remove after animation
+      setTimeout(() => {
+        this.tasks.splice(index, 1);
+        this.saveTasksToLocalStorage();
+        this.updateFilteredTasks();
+      }, 500);
+    }
   }
 
-  // Save todos to localStorage
-  saveTodosToLocalStorage(): void {
-    localStorage.setItem('todos', JSON.stringify(this.todos));
+  // Change filter
+  setFilter(filter: FilterType): void {
+    this.currentFilter = filter;
+    this.updateFilteredTasks();
   }
 
-  // Load todos from localStorage
-  loadTodos(): void {
-    const savedTodos = localStorage.getItem('todos');
-    if (savedTodos) {
-      this.todos = JSON.parse(savedTodos);
+  // Update filtered tasks based on current filter
+  private updateFilteredTasks(): void {
+    switch (this.currentFilter) {
+      case 'active':
+        this.filteredTasks = this.tasks.filter(task => !task.completed);
+        break;
+      case 'completed':
+        this.filteredTasks = this.tasks.filter(task => task.completed);
+        break;
+      default:
+        this.filteredTasks = [...this.tasks];
+    }
+  }
+
+  // Get count of active tasks
+  getActiveCount(): number {
+    return this.tasks.filter(task => !task.completed).length;
+  }
+
+  // Get count of completed tasks
+  getCompletedCount(): number {
+    return this.tasks.filter(task => task.completed).length;
+  }
+
+  // Save tasks to localStorage
+  private saveTasksToLocalStorage(): void {
+    localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    // Update nextId to be one more than the max id
+    this.nextId = this.tasks.length > 0
+      ? Math.max(...this.tasks.map(t => t.id)) + 1
+      : 0;
+  }
+
+  // Load tasks from localStorage
+  private loadTasks(): void {
+    const savedTasks = localStorage.getItem('tasks');
+    if (savedTasks) {
+      this.tasks = JSON.parse(savedTasks);
+      this.nextId = this.tasks.length > 0
+        ? Math.max(...this.tasks.map(t => t.id)) + 1
+        : 0;
+      this.updateFilteredTasks();
     }
   }
 }

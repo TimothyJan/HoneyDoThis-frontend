@@ -1,15 +1,15 @@
-<!-- Add Todo Form -->
+<!-- Add task Form -->
 <div id="form">
-    <form (ngSubmit)="addToDo($event)">
+    <form (ngSubmit)="addTask($event)">
         <input
-            class="todo-input"
+            class="task-input"
             type="text"
             placeholder="Add a task."
-            [(ngModel)]="newTodoText"
+            [(ngModel)]="newTaskText"
             name="todoInput"
             [ngClass]="currentTheme + '-input'">
         <button
-            class="todo-btn"
+            class="task-btn"
             type="submit"
             [ngClass]="currentTheme + '-button'">
             Add
@@ -17,26 +17,74 @@
     </form>
 </div>
 
-<!-- Todo List -->
+<!-- Filter Buttons -->
+<div class="filter-container">
+    <button
+        class="filter-btn"
+        [ngClass]="[
+            currentTheme + '-button',
+            currentFilter === 'all' ? 'active-filter' : ''
+        ]"
+        (click)="setFilter('all')">
+        View All ({{ tasks.length }})
+    </button>
+    <button
+        class="filter-btn"
+        [ngClass]="[
+            currentTheme + '-button',
+            currentFilter === 'active' ? 'active-filter' : ''
+        ]"
+        (click)="setFilter('active')">
+        Active ({{ getActiveCount() }})
+    </button>
+    <button
+        class="filter-btn"
+        [ngClass]="[
+            currentTheme + '-button',
+            currentFilter === 'completed' ? 'active-filter' : ''
+        ]"
+        (click)="setFilter('completed')">
+        Completed ({{ getCompletedCount() }})
+    </button>
+</div>
+
+<!-- Task List -->
 <div id="myUnOrdList">
-    <ul class="todo-list">
-        <li *ngFor="let todo of todos; let i = index"
-            class="todo"
-            [ngClass]="[currentTheme + '-todo', todo.completed ? 'completed' : '']"
-            [class.fall]="todo.isFalling">
-            <span class="todo-item">{{ todo.text }}</span>
-            <button
-                class="check-btn"
-                [ngClass]="currentTheme + '-button'"
-                (click)="toggleComplete(i)">
-                <i class="fas fa-check"></i>
-            </button>
-            <button
-                class="delete-btn"
-                [ngClass]="currentTheme + '-button'"
-                (click)="deleteTodo(i)">
-                <i class="fas fa-trash"></i>
-            </button>
-        </li>
+    <ul class="task-list">
+        @for(task of filteredTasks; track task.id) {
+            <li class="task"
+                [ngClass]="[currentTheme + '-task', task.completed ? 'completed' : '']"
+                [class.fall]="task.isFalling">
+                <span class="task-item">{{ task.text }}</span>
+                <button
+                    class="check-btn"
+                    [ngClass]="currentTheme + '-button'"
+                    (click)="toggleComplete(task.id)">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button
+                    class="delete-btn"
+                    [ngClass]="currentTheme + '-button'"
+                    (click)="deleteTask(task.id)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </li>
+        }
+
+        <!-- Empty state message -->
+        @if (filteredTasks.length === 0) {
+            <li class="task empty-state"
+                [ngClass]="currentTheme + '-task'">
+                <span class="task-item">
+                    @if (currentFilter === 'all') {
+                        No tasks yet. Add one above!
+                    } @else if (currentFilter === 'active') {
+                        No active tasks. Great job!
+                    } @else {
+                        No completed tasks yet.
+                    }
+                </span>
+            </li>
+        }
     </ul>
 </div>
