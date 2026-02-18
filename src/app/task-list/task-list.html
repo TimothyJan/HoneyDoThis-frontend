@@ -1,0 +1,42 @@
+<!-- Add Todo Form -->
+<div id="form">
+    <form (ngSubmit)="addToDo($event)">
+        <input
+            class="todo-input"
+            type="text"
+            placeholder="Add a task."
+            [(ngModel)]="newTodoText"
+            name="todoInput"
+            [ngClass]="currentTheme + '-input'">
+        <button
+            class="todo-btn"
+            type="submit"
+            [ngClass]="currentTheme + '-button'">
+            Add
+        </button>
+    </form>
+</div>
+
+<!-- Todo List -->
+<div id="myUnOrdList">
+    <ul class="todo-list">
+        <li *ngFor="let todo of todos; let i = index"
+            class="todo"
+            [ngClass]="[currentTheme + '-todo', todo.completed ? 'completed' : '']"
+            [class.fall]="todo.isFalling">
+            <span class="todo-item">{{ todo.text }}</span>
+            <button
+                class="check-btn"
+                [ngClass]="currentTheme + '-button'"
+                (click)="toggleComplete(i)">
+                <i class="fas fa-check"></i>
+            </button>
+            <button
+                class="delete-btn"
+                [ngClass]="currentTheme + '-button'"
+                (click)="deleteTodo(i)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </li>
+    </ul>
+</div>

@@ -1,15 +1,15 @@
 import { Component, signal } from '@angular/core';
-import { Main } from "./main/main";
-import { Theme } from './header/theme/theme';
-import { Title } from './header/title/title';
 import { Header } from './header/header';
+import { TaskList } from "./task-list/task-list";
+import { Footer } from './footer/footer';
 
 @Component({
   selector: 'app-root',
   imports: [
     Header,
-    Main,
-  ],
+    TaskList,
+    Footer
+],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

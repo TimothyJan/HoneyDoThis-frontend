@@ -1,0 +1,24 @@
+<section id="footer" [ngClass]="currentTheme">
+  <div class="footer container">
+    <h2 [class.darker-text]="currentTheme === 'darker'"
+        [class.light-text]="currentTheme === 'light'"
+        [class.standard-text]="currentTheme === 'standard'">
+      Developed by Timothy Jan
+    </h2>
+    <div class="social-icon">
+      <div class="social-item"
+           [class.darker-social]="currentTheme === 'darker'"
+           [class.light-social]="currentTheme === 'light'"
+           [class.standard-social]="currentTheme === 'standard'">
+        <a href="https://github.com/TimothyJan/HoneyDoThis-frontend" target="_blank">
+          <img src="./assets/icons/github.png" alt="GitHub" />
+        </a>
+      </div>
+    </div>
+    <p [class.darker-text]="currentTheme === 'darker'"
+       [class.light-text]="currentTheme === 'light'"
+       [class.standard-text]="currentTheme === 'standard'">
+      Copyright © 2026 HoneyDoThis. All rights reserved
+    </p>
+  </div>
+</section>
