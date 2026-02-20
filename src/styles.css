@@ -81,14 +81,18 @@ body {
     font-family: 'Work Sans', sans-serif;
     min-height: 100vh;
     padding-top: 15px;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 .container {
     min-height: 100vh;
     width: 100%;
+    max-width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow-x: hidden;
 }
 
 /* ==========================================================================
@@ -123,7 +127,9 @@ body.darker {
     font-size: clamp(1.5rem, 8vw, 3rem);
     min-height: 10vh;
     width: 100%;
+    max-width: 100%;
     padding-top: 10px;
+    overflow-x: hidden;
 }
 
 /* Theme buttons */
@@ -210,7 +216,7 @@ body.darker {
     margin: 0 auto;
     min-height: 10vh;
     width: 100%;
-    max-width: 800px;
+    max-width: 100%;
     padding: 0 1rem;
 }
 
@@ -221,6 +227,7 @@ form {
     margin: 15px 0;
     padding: 0.8rem;
     width: 100%;
+    max-width: 100%;
 }
 
 form input {
@@ -404,7 +411,8 @@ form button {
     margin: 20px auto;
     padding: 0 1rem;
     flex-wrap: wrap;
-    max-width: 800px;
+    max-width: 100%;
+    width: 100%;
 }
 
 .filter-btn {
@@ -451,7 +459,8 @@ form button {
     display: flex;
     justify-content: center;
     margin: 10px auto 20px;
-    max-width: 800px;
+    max-width: 100%;
+    width: 100%;
 }
 
 .clear-btn {
@@ -470,31 +479,68 @@ form button {
 }
 
 /* ==========================================================================
-   TASK LIST - MAIN CONTAINER
+   TASK LIST - MAIN CONTAINER - HYBRID FLEX/GRID LAYOUT
    ========================================================================== */
 #myUnOrdList {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
+    max-width: 100vw;
     margin: 0 auto;
     padding: 0 1rem;
+    overflow-x: hidden;
 }
 
 .task-list {
-    min-width: 25%;
     list-style: none;
     width: 100%;
-    max-width: 800px;
+    max-width: 1400px;
     margin: 0 auto;
+
+    /* Default: vertical stack (mobile first) */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+/* When viewport is wide enough for 2+ tasks, switch to grid */
+@media only screen and (min-width: 700px) {
+    .task-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+/* When viewport is even wider, allow more columns */
+@media only screen and (min-width: 1000px) {
+    .task-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* When viewport is very wide, allow even more columns */
+@media only screen and (min-width: 1300px) {
+    .task-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Optional: If you want to limit maximum columns */
+@media only screen and (min-width: 1600px) {
+    .task-list {
+        grid-template-columns: repeat(5, 1fr);
+    }
 }
 
 /* ==========================================================================
    TASK ITEM - CORE STYLES
    ========================================================================== */
 .task {
-    margin: 1rem auto;
-    font-size: 19px;
+    margin: 0;
+    font-size: clamp(16px, 2vw, 19px);
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -504,8 +550,12 @@ form button {
     position: relative;
     cursor: default;
     width: 100%;
-    max-width: 100%;
+    height: fit-content;
     gap: 8px;
+    break-inside: avoid;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
 /* Task theme backgrounds */
@@ -521,6 +571,12 @@ form button {
     background-color: var(--task-bg-darker);
 }
 
+/* Ensure drag and drop works properly */
+.task.cdk-drag {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    z-index: 1000;
+}
+
 /* Task content wrapper - contains all task content next to drag handle */
 .task-content-wrapper {
     display: flex;
@@ -528,6 +584,7 @@ form button {
     flex: 1;
     min-width: 0;
     width: 100%;
+    max-width: 100%;
 }
 
 /* Main task content row (text + action buttons) */
@@ -536,15 +593,18 @@ form button {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .task .task-item {
-    padding: 7px;
-    font-size: 20px;
-    flex: 1;
+    padding: 5px;
+    font-size: clamp(16px, 2vw, 20px);
+    flex: 1 1 auto;
     border-radius: 30px;
     overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 150px;
 }
 
 /* Task action buttons container */
@@ -552,6 +612,8 @@ form button {
     display: flex;
     gap: 5px;
     flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 /* ==========================================================================
@@ -565,14 +627,7 @@ form button {
     cursor: grabbing;
 }
 
-.cdk-drag-preview {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    border-radius: 30px;
-    opacity: 0.9;
-    transform: scale(1.02);
-    z-index: 1000;
-}
-
+/* Adjust drag placeholder */
 .cdk-drag-placeholder {
     opacity: 0.3;
     background: repeating-linear-gradient(
@@ -582,8 +637,9 @@ form button {
         rgba(255, 255, 255, 0.1) 10px,
         rgba(255, 255, 255, 0.1) 20px
     );
-    min-height: 60px;
+    min-height: 100px;
     border: 2px dashed currentColor;
+    border-radius: 30px;
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
@@ -593,6 +649,17 @@ form button {
 
 .task-list.cdk-drop-list-dragging .task:not(.cdk-drag-placeholder) {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Fix for drag preview */
+.cdk-drag-preview {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 30px;
+    opacity: 0.9;
+    transform: scale(1.02) !important;
+    z-index: 1000;
+    background-color: inherit;
+    max-width: 350px;
 }
 
 /* Drag handle */
@@ -635,7 +702,8 @@ form button {
     font-size: 0.9rem;
     opacity: 0.7;
     transition: opacity 0.3s ease;
-    max-width: 800px;
+    max-width: 100%;
+    width: 100%;
 }
 
 .drag-instructions i {
@@ -650,6 +718,7 @@ form button {
     align-items: center;
     justify-content: space-between;
     min-width: 200px;
+    max-width: 300px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -690,7 +759,7 @@ body.darker .drag-placeholder {
     gap: 5px;
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 13px;
+    font-size: clamp(11px, 1.5vw, 13px);
     min-width: unset;
     margin-bottom: 5px;
     opacity: 0.9;
@@ -702,12 +771,12 @@ body.darker .drag-placeholder {
 }
 
 .subtask-toggle-btn i {
-    font-size: 11px;
+    font-size: clamp(10px, 1.2vw, 11px);
 }
 
 /* Subtask count badge */
 .subtask-count-badge {
-    font-size: 10px;
+    font-size: clamp(9px, 1.2vw, 10px);
     background: rgba(255, 255, 255, 0.2);
     padding: 2px 6px;
     border-radius: 10px;
@@ -722,12 +791,13 @@ body.light .subtask-count-badge {
    SUBTASK CONTAINER (EXPANDED VIEW)
    ========================================================================== */
 .subtask-container {
-    margin-left: 1.5rem;
+    margin-left: 0.5rem;
     margin-top: 0.5rem;
     border-left: 2px solid currentColor;
     opacity: 0.9;
     transition: all 0.3s ease;
-    width: calc(100% - 1.5rem);
+    width: calc(100% - 0.5rem);
+    max-width: 100%;
 }
 
 /* Subtask Header */
@@ -756,6 +826,7 @@ body.light .subtask-count-badge {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .completion-badge {
@@ -779,6 +850,7 @@ body.darker .completion-badge {
 .add-subtask-form {
     padding: 5px 0;
     width: 100%;
+    max-width: 100%;
 }
 
 .add-subtask-form form {
@@ -787,17 +859,19 @@ body.darker .completion-badge {
     margin: 0;
     padding: 0;
     width: 100%;
+    max-width: 100%;
 }
 
 .subtask-input {
     flex: 1;
     padding: 8px 12px;
-    font-size: 14px;
+    font-size: clamp(12px, 2vw, 14px);
     border: none;
     outline: none;
     border-radius: 15px;
     transition: all 0.2s ease;
     width: 100%;
+    min-width: 50px;
 }
 
 /* ==========================================================================
@@ -807,7 +881,7 @@ body.darker .completion-badge {
     width: 2em;
     height: 2em;
     border-radius: 80%;
-    font-size: 16px;
+    font-size: clamp(14px, 2vw, 16px);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -819,7 +893,7 @@ body.darker .completion-badge {
 }
 
 .add-subtask-btn i {
-    font-size: 14px;
+    font-size: clamp(12px, 1.8vw, 14px);
     pointer-events: none;
 }
 
@@ -859,6 +933,8 @@ body.darker .completion-badge {
 /* Subtask List */
 .subtask-list {
     padding: 5px 0;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Subtask Item */
@@ -871,6 +947,9 @@ body.darker .completion-badge {
     border-radius: 20px;
     transition: all 0.2s ease;
     background: rgba(255, 255, 255, 0.05);
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
 }
 
 .subtask-item:hover {
@@ -916,22 +995,24 @@ body.light .subtask-item:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: clamp(10px, 1.5vw, 12px);
     padding: 0;
     min-width: unset;
     flex-shrink: 0;
 }
 
 .subtask-check i {
-    font-size: 14px;
+    font-size: clamp(12px, 1.8vw, 14px);
 }
 
 /* Subtask Text */
 .subtask-text {
     flex: 1;
-    font-size: 15px;
+    font-size: clamp(13px, 2vw, 15px);
     padding: 3px 0;
     overflow-wrap: anywhere;
+    word-break: break-word;
+    min-width: 100px;
 }
 
 /* Subtask Delete Button */
@@ -942,7 +1023,7 @@ body.light .subtask-item:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: clamp(10px, 1.5vw, 12px);
     padding: 0;
     min-width: unset;
     opacity: 0.5;
@@ -955,7 +1036,7 @@ body.light .subtask-item:hover {
 }
 
 .subtask-delete i {
-    font-size: 12px;
+    font-size: clamp(10px, 1.5vw, 12px);
 }
 
 /* Subtask Drag and Drop */
@@ -1005,11 +1086,14 @@ body.light .subtask-item:hover {
     cursor: default;
     display: flex;
     align-items: center;
+    grid-column: 1 / -1;
+    width: 100%;
 }
 
 .task.empty-state .task-item {
     text-align: center;
     font-style: italic;
+    width: 100%;
 }
 
 .task.empty-state:hover {
@@ -1023,7 +1107,9 @@ body.light .subtask-item:hover {
 #footer {
     position: relative;
     width: 100%;
+    max-width: 100vw;
     transition: all 0.3s linear;
+    overflow-x: hidden;
 }
 
 #footer .footer {
@@ -1033,6 +1119,8 @@ body.light .subtask-item:hover {
     padding-bottom: 15px;
     position: relative;
     z-index: 1;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Theme-specific text colors */
@@ -1050,7 +1138,7 @@ body.light .subtask-item:hover {
 
 #footer h2 {
     font-weight: 500;
-    font-size: 1.8rem;
+    font-size: clamp(1.5rem, 4vw, 1.8rem);
     letter-spacing: 0.1rem;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -1062,6 +1150,7 @@ body.light .subtask-item:hover {
     margin-bottom: 10px;
     gap: 20px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 /* Base social item styles */
@@ -1136,12 +1225,12 @@ body.light .subtask-item:hover {
 }
 
 #footer p {
-    font-size: 1.3rem;
+    font-size: clamp(1rem, 3vw, 1.3rem);
     transition: color 0.3s linear;
 }
 
 /* ==========================================================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN - ENHANCED FOR ALL DEVICES
    ========================================================================== */
 @media only screen and (max-width: 1000px) {
     .flexrow-container {
@@ -1174,6 +1263,46 @@ body.light .subtask-item:hover {
     }
 }
 
+@media only screen and (max-width: 700px) {
+    /* Force vertical stack on smaller screens */
+    .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .task {
+        margin: 0;
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .task-list {
+        padding: 0.25rem;
+    }
+
+    .task {
+        padding: 0.5em;
+    }
+
+    .task .task-item {
+        font-size: 16px;
+    }
+
+    .task-actions {
+        gap: 3px;
+    }
+
+    .check-btn, .delete-btn, .subtask-add-btn {
+        width: 1.8em;
+        height: 1.8em;
+        margin: 0 3px;
+    }
+}
+
 @media only screen and (max-width: 500px) {
     .drag-handle {
         width: 20px;
@@ -1187,25 +1316,43 @@ body.light .subtask-item:hover {
     .filter-container {
         flex-direction: column;
         align-items: center;
+        gap: 8px;
     }
 
     .filter-btn {
-        width: 80%;
-        max-width: 200px;
+        width: 90%;
+        max-width: 250px;
     }
 
     .subtask-container {
-        margin-left: 1rem;
-        width: calc(100% - 1rem);
+        margin-left: 0.25rem;
+        width: calc(100% - 0.25rem);
     }
 
     .subtask-text {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .subtask-check, .subtask-delete {
-        width: 30px;
-        height: 30px;
+        width: 25px;
+        height: 25px;
+    }
+
+    .task-list {
+        padding: 0.2rem;
+    }
+
+    .task {
+        padding: 0.4em;
+    }
+
+    .task .task-item {
+        font-size: 15px;
+        min-width: 100px;
+    }
+
+    .task-main-row {
+        gap: 5px;
     }
 }
 
@@ -1227,16 +1374,32 @@ body.light .subtask-item:hover {
 
     form input {
         border-radius: 17px;
+        width: 100%;
     }
 
     form button {
         border-radius: 15px;
         margin-top: 15px;
-        width: 50%;
+        width: 80%;
+        min-width: 120px;
     }
 
     form > button.light-button {
         box-shadow: 0 0 5px var(--shadow-light);
+    }
+
+    .task .task-item {
+        font-size: 14px;
+        min-width: 80px;
+    }
+
+    .check-btn, .delete-btn, .subtask-add-btn {
+        width: 1.6em;
+        height: 1.6em;
+    }
+
+    .check-btn i, .delete-btn i, .subtask-add-btn i {
+        font-size: 14px;
     }
 }
 
